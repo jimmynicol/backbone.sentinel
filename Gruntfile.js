@@ -72,7 +72,7 @@ module.exports = function(grunt){
       livereload: {
         options: {
           open: true,
-          base: ['.', 'docs/', 'docs/source']
+          base: ['.']
         }
       }
     },
@@ -101,7 +101,7 @@ module.exports = function(grunt){
         options: {
           livereload: '<%= connect.options.livereload %>'
         },
-        files: ['lib/**/*.js', 'docs/index.html']
+        files: ['lib/**/*.js', 'index.html']
       }
     }
   });
