@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+  <html class="no-js">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Backbone.Sentinel</title>
+    <meta name="description" content="">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="cleartype" content="on">
+
+    <!-- Browser favicon -->
+    <link rel="shortcut icon" href="favicon.png">
+    <link rel="stylesheet" media="all" href="source/docco.css" />
+
+    <style type="text/css">
+      html, body {
+        padding: 20px 30px;
+      }
+      .component {
+        padding: 10px;
+        border: 1px solid #eee;
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <ul>
+      <li>
+        <a href="source/backbone.sentinel.html">Annonated Source</a>
+      </li>
+      <li>
+        <a href="#edit/else">#edit/else</a>
+      </li>
+      <li>
+        <a href="#edit/something">#edit/something</a>
+      </li>
+      <li>
+        <a href="#delete/4">#delete/:id</a>
+      </li>
+    </ul>
+
+    <div id="component-2"></div>
+
+    <script src="js/jquery.js"></script>
+    <script src="js/underscore.js"></script>
+    <script src="js/backbone.js"></script>
+    <script src="js/backbone.sentinel.js"></script>
+
+    <script type="text/javascript">
+      var Component1 = Backbone.Sentinel.Component.extend({
+        _name: 'Component1',
+
+        routes: {
+          'edit/:title': 'editTitle',
+          'edit/else': 'editElse'
+        },
+
+        events: {
+          'click a': 'clickHandler'
+        },
+
+        sentinelOptions: {
+          renderOnRegister: false,
+          renderOnRoute: true,
+          removeOffRoute: true
+        },
+
+        id: '#component-1',
+        className: 'component',
+
+        initialize: function(){
+          this.log('initialize', arguments);
+          this.sentinel.on('all', function(){
+            console.log('c1 listen all', arguments);
+          });
+          // this.sentinel.store.set('something', 'else');
+        },
+
+        render: function(){
+          this.log('render');
+          $('body script').first().before(this.$el);
+          this.$el.html($('#component-1-template').html());
+          this.trigger('render', 'something');
+          return this;
+        },
+
+        editTitle: function(){
+          this.log('edit title');
+        },
+
+        editElse: function(){
+          this.log('edit else');
+        },
+
+        clickHandler: function(){
+          console.log('click handler', arguments);
+        }
+      });
+
+      var Component2 = Backbone.Sentinel.Component.extend({
+        _name: 'Component2',
+        routes: { 'delete/:id': 'deletePost' },
+        sentinelOptions: { renderOnRegister: true },
+
+        initialize: function(){
+          this.log('initialize');
+        },
+
+        render: function(){
+          this.log('render');
+        },
+
+        deletePost: function(){
+          this.log('delete post');
+        }
+      });
+
+      window.c1 = new Component1({ something: 'else' });
+      window.c2 = new Component2();
+
+      Backbone.Sentinel.register([c1, c2]);
+      // $(function(){
+      //   Backbone.Sentinel.register([c1, c2]);
+      // });
+    </script>
+
+    <script id="component-1-template" type="backbone-template">
+      <h2>Title</h2>
+      <p><a>Link</a></p>
+    </script>
+
+  </body>
+</html>
