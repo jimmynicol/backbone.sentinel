@@ -24,18 +24,18 @@ module.exports = function(grunt){
       options: {
         jshintrc: '.jshintrc'
       },
-      all: ['Gruntfile.js', 'lib/**/*.js']
+      all: ['Gruntfile.js', 'backbone.sentinel.js']
     },
-    concat: {
-      options: {
-        banner: '<%= meta.banner %>'
-      },
+    preprocess: {
       all: {
-        src:  [
-          'lib/sentinel.js',
-          'lib/sentinel.*.js'
-        ],
-        dest: 'backbone.sentinel.js'
+        src: 'lib/sentinel.connector.js',
+        dest: 'backbone.sentinel.js',
+        options: {
+          context: {
+            BANNER: '<%= meta.banner %>',
+            VERSION: '<%= meta.version %>'
+          }
+        }
       }
     },
     uglify: {
@@ -95,7 +95,7 @@ module.exports = function(grunt){
       },
       jshint: {
         files: ['Gruntfile.js', 'index.js', 'lib/**/*.js'],
-        tasks: ['jshint', 'compile']
+        tasks: ['compile', 'jshint']
       },
       livereload: {
         options: {
@@ -107,10 +107,10 @@ module.exports = function(grunt){
   });
 
   grunt.registerTask('test',    ['mocha']);
-  grunt.registerTask('compile', ['concat', 'copy', 'uglify']);
+  grunt.registerTask('compile', ['preprocess', 'copy', 'uglify']);
   grunt.registerTask('docs',    ['compile', 'docco']);
   grunt.registerTask(
-    'default', ['jshint', 'test', 'compile', 'connect', 'watch']
+    'default', ['compile', 'jshint', 'test', 'connect', 'watch']
   );
 
 };

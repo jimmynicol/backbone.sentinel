@@ -64,10 +64,9 @@ anything with conflicting routes.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>(<span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
-  <span class="string">'use strict'</span>;
-
-  <span class="keyword">var</span> root = <span class="keyword">this</span>;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>
+(<span class="function"><span class="keyword">function</span><span class="params">(root, factory)</span>{</span>
+  <span class="string">'use strict'</span>;</pre></div></div>
             
         </li>
         
@@ -78,16 +77,14 @@ anything with conflicting routes.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>Import Backbone if it isnt already in place</p>
+              <p>Set up Backbone appropriately for the environment. Start with AMD.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> Backbone = root.Backbone;
-  <span class="keyword">if</span> (!Backbone){
-    <span class="keyword">if</span>(<span class="keyword">typeof</span> exports !== <span class="string">'undefined'</span>){
-      Backbone = require(<span class="string">'backbone'</span>);
-    }
-  }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (<span class="keyword">typeof</span> define === <span class="string">'function'</span> &amp;&amp; define.amd) {
+    define([<span class="string">'backbone'</span>, <span class="string">'underscore'</span>], <span class="function"><span class="keyword">function</span><span class="params">(Backbone, _)</span>{</span>
+      <span class="keyword">return</span> factory(root, Backbone, _);
+    });</pre></div></div>
             
         </li>
         
@@ -98,16 +95,14 @@ anything with conflicting routes.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>Import Underscore if it isnt already in place</p>
+              <p>Next for Node.js or CommonJS</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> _ = root._;
-  <span class="keyword">if</span> (!_){
-    <span class="keyword">if</span>(<span class="keyword">typeof</span> exports !== <span class="string">'undefined'</span>){
-      _ = require(<span class="string">'underscore'</span>);
-    }
-  }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">typeof</span> exports !== <span class="string">'undefined'</span>) {
+    <span class="keyword">var</span> _ = require(<span class="string">'underscore'</span>),
+        Backbone = require(<span class="string">'backbone'</span>);
+    module.exports = factory(root, Backbone, _);</pre></div></div>
             
         </li>
         
@@ -118,11 +113,19 @@ anything with conflicting routes.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p>Assign array slice to a variable for later use</p>
+              <p>Finally, as a browser global.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> slice = [].slice;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  } <span class="keyword">else</span> {
+    root.Backbone.Sentinel = factory(root, root.Backbone, root._);
+  }
+
+}(<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span><span class="params">(root, Backbone, _)</span>{</span>
+  <span class="string">'use strict'</span>;
+
+  <span class="keyword">var</span> $ = Backbone.$,
+      slice = [].slice;</pre></div></div>
             
         </li>
         
@@ -150,15 +153,15 @@ anything with conflicting routes.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  Backbone.SentinelLog = {
-
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> Log = {
+  
     logDebugMode: <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
       <span class="keyword">if</span> (window){
         <span class="keyword">return</span> (<span class="regexp">/log=debug/</span>).test(window.location.search);
       }
       <span class="keyword">return</span> <span class="literal">false</span>;
     },
-
+  
     log: <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
       <span class="keyword">if</span> (console &amp;&amp; <span class="keyword">this</span>.logDebugMode()){
         <span class="keyword">if</span> (<span class="keyword">this</span>._name){
@@ -198,11 +201,11 @@ components try to share routes.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>
-  <span class="keyword">var</span> Sentinel = Backbone.Sentinel = <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+            <div class="content"><div class='highlight'><pre>  
+  <span class="keyword">var</span> Sentinel = <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
     <span class="keyword">this</span>._name = <span class="string">'Sentinel'</span>;
     <span class="keyword">this</span>._queue = [];
-
+  
     <span class="keyword">this</span>.initializeRouter();
     <span class="keyword">this</span>.initializeStore();</pre></div></div>
             
@@ -238,11 +241,9 @@ components try to share routes.</p>
             
             <div class="content"><div class='highlight'><pre>      _this.queue();
     });
-
+  
     <span class="keyword">this</span>.log(<span class="string">'initialized!'</span>);
-  };
-
-  Sentinel.VERSION = <span class="string">'0.0.1'</span>;</pre></div></div>
+  };</pre></div></div>
             
         </li>
         
@@ -299,7 +300,7 @@ components try to share routes.</p>
             
             <div class="content"><div class='highlight'><pre>  Sentinel.register = <span class="function"><span class="keyword">function</span><span class="params">(component)</span>{</span>
     <span class="keyword">var</span> sentinel = Sentinel.getInstance();
-
+  
     <span class="keyword">if</span> (_.isArray(component)){
       _.each(component, <span class="function"><span class="keyword">function</span><span class="params">(c)</span>{</span>
         sentinel.registerComponent(c);
@@ -324,7 +325,7 @@ components try to share routes.</p>
             
             <div class="content"><div class='highlight'><pre>  Sentinel.list = <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
     <span class="keyword">var</span> sentinel = Sentinel.getInstance();
-
+  
     <span class="keyword">return</span> _.map(sentinel.components, <span class="function"><span class="keyword">function</span><span class="params">(c)</span>{</span>
       <span class="keyword">return</span> {
         routes: c.routes,
@@ -332,7 +333,7 @@ components try to share routes.</p>
       };
     });
   };
-
+  
   <span class="keyword">var</span> SentinelMethods = {</pre></div></div>
             
         </li>
@@ -382,7 +383,7 @@ components try to share routes.</p>
             
             <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (<span class="keyword">this</span>.domLoaded === <span class="literal">true</span>){
         <span class="keyword">var</span> i, next, queueLength = <span class="keyword">this</span>._queue.length;
-
+  
         <span class="keyword">for</span> (i=<span class="number">0</span>; i &lt; queueLength; i++){
           next = <span class="keyword">this</span>._queue.shift();
           <span class="keyword">if</span> (<span class="keyword">typeof</span> next !== <span class="string">'undefined'</span>){
@@ -391,7 +392,7 @@ components try to share routes.</p>
         }
       }
     },
-
+  
     registerComponent: <span class="function"><span class="keyword">function</span><span class="params">(component)</span>{</span></pre></div></div>
             
         </li>
@@ -494,7 +495,7 @@ components try to share routes.</p>
             <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (component.routes){
         <span class="keyword">this</span>.registerRoutes(component);
       }
-
+  
       <span class="keyword">this</span>.log(component._name + <span class="string">' registered!'</span>);
     },</pre></div></div>
             
@@ -517,7 +518,7 @@ and run when needed</p>
       _.result(component, <span class="string">'render'</span>);
       component._sentinelRendered = <span class="literal">true</span>;
     },
-
+  
     registerRoutes: <span class="function"><span class="keyword">function</span><span class="params">(component)</span>{</span>
       <span class="keyword">var</span> _this = <span class="keyword">this</span>;
       <span class="keyword">this</span>.routeMap = <span class="keyword">this</span>.routeMap || {};</pre></div></div>
@@ -588,7 +589,7 @@ route</p>
             <div class="content"><div class='highlight'><pre>        _this.queue(_this.sentinelRoute, [route, func, component]);
       });
     },
-
+  
     sentinelRoute: <span class="function"><span class="keyword">function</span><span class="params">(route, func, component)</span>{</span>
       <span class="keyword">this</span>.route(route, component.cid + <span class="string">'-'</span> + func);
       Backbone.history.loadUrl();
@@ -676,7 +677,7 @@ component and method.</p>
             
             <div class="content"><div class='highlight'><pre>    handleRoute: <span class="function"><span class="keyword">function</span><span class="params">(name, args)</span>{</span>
       <span class="keyword">var</span> cid, func, component, _this;
-
+  
       _this = <span class="keyword">this</span>;</pre></div></div>
             
         </li>
@@ -851,13 +852,11 @@ model as events on Sentinel</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  _.extend(
-    Backbone.Sentinel.prototype,
-    Backbone.SentinelLog,
+    Sentinel.prototype,
+    Log,
     Backbone.Router.prototype,
     SentinelMethods
-  );
-
-}).call(<span class="keyword">this</span>);</pre></div></div>
+  );</pre></div></div>
             
         </li>
         
@@ -899,14 +898,11 @@ within the class what routes it should respond to.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>Backbone.Sentinel.Component = (<span class="function"><span class="keyword">function</span><span class="params">(Backbone, _)</span>{</span>
-  <span class="string">'use strict'</span>;
-
-  <span class="function"><span class="keyword">function</span> <span class="title">methodNotImplemented</span><span class="params">(method)</span>{</span>
-    <span class="keyword">throw</span> <span class="string">'Please implement the "'</span> + method + <span class="string">'" method!'</span>;
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">function</span> <span class="title">methodNotImplemented</span><span class="params">(method)</span>{</span>
+    <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'Please implement the "'</span> + method + <span class="string">'" method!'</span>);
   }
-
-  <span class="keyword">var</span> methods = _.extend(Backbone.SentinelLog, {</pre></div></div>
+  
+  <span class="keyword">var</span> ComponentMethods = _.extend(Log, {</pre></div></div>
             
         </li>
         
@@ -969,7 +965,7 @@ overriden</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">this</span>.sentinel = Backbone.Sentinel.getInstance();</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">this</span>.sentinel = Sentinel.getInstance();</pre></div></div>
             
         </li>
         
@@ -984,7 +980,7 @@ overriden</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      _.extend(_so, Backbone.Sentinel.componentOptions, <span class="keyword">this</span>.sentinelOptions);
+            <div class="content"><div class='highlight'><pre>      _.extend(_so, Sentinel.componentOptions, <span class="keyword">this</span>.sentinelOptions);
       <span class="keyword">this</span>.sentinelOptions = _so;</pre></div></div>
             
         </li>
@@ -1002,12 +998,11 @@ overriden</p>
             
             <div class="content"><div class='highlight'><pre>      Backbone.View.apply(<span class="keyword">this</span>, arguments);
     },
-
+  
     render: <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span> methodNotImplemented(<span class="string">'render'</span>); }
   });
-
-  <span class="keyword">return</span> Backbone.View.extend(methods);
-})(Backbone, _);</pre></div></div>
+  
+  <span class="keyword">var</span> Component = Sentinel.Component = Backbone.View.extend(ComponentMethods);</pre></div></div>
             
         </li>
         
@@ -1022,11 +1017,15 @@ overriden</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>Backbone.Sentinel.Component.include = <span class="function"><span class="keyword">function</span><span class="params">(obj)</span> {</span>
-  <span class="string">'use strict'</span>;
-  _.extend(<span class="keyword">this</span>.prototype, obj.prototype);
-  <span class="keyword">return</span> <span class="keyword">this</span>;
-};</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  Component.include = <span class="function"><span class="keyword">function</span><span class="params">(obj)</span> {</span>
+    _.extend(<span class="keyword">this</span>.prototype, obj.prototype);
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  };
+
+  Sentinel.VERSION = <span class="string">'0.0.1'</span>;
+
+  <span class="keyword">return</span> Sentinel;
+}));</pre></div></div>
             
         </li>
         
