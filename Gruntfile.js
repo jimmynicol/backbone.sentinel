@@ -72,7 +72,7 @@ module.exports = function(grunt){
       livereload: {
         options: {
           open: true,
-          base: ['docs/', 'docs/source']
+          base: ['.', 'docs/', 'docs/source']
         }
       }
     },
