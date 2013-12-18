@@ -2,7 +2,7 @@
   "name": "backbone.sentinel",
   "version": "0.0.1",
   "description": "Backbone.js extension for managing on page components",
-  "main": "index.js",
+  "main": "backbone.sentinel.js",
   "scripts": {
     "test": "grunt test"
   },

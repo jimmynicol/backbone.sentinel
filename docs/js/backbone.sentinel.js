@@ -17,13 +17,13 @@
 (function(root, factory){
   'use strict';
 
-  // Set up Backbone appropriately for the environment. Start with AMD.
+  // AMD: import Backbone and underscore into the factory
   if (typeof define === 'function' && define.amd) {
     define(['backbone', 'underscore'], function(Backbone, _){
       return factory(root, Backbone, _);
     });
 
-  // Next for Node.js or CommonJS
+  // CommonJS: for Node.js or Browserify
   } else if (typeof exports !== 'undefined') {
     var _ = require('underscore'),
         Backbone = require('backbone');
@@ -38,7 +38,7 @@
   'use strict';
 
   var $ = Backbone.$,
-      slice = [].slice;
+      slice = [].slice; // grab the slice method off the Array prototype
 
   // Sentinel Log
   // ------------
