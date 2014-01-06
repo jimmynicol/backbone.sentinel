@@ -49,6 +49,13 @@
     <script src="docs/js/backbone.sentinel.js"></script>
 
     <script type="text/javascript">
+      Backbone.Sentinel.Bootstrap = {
+        activity: { id: 123, title: 'Something', description: 'Else!' },
+        user: { id: 321, first_name: 'Test', last_name: 'Testerson' }
+      };
+    </script>
+
+    <script type="text/javascript">
       var Component1 = Backbone.Sentinel.Component.extend({
         _name: 'Component1',
 
@@ -121,9 +128,9 @@
       window.c2 = new Component2();
 
       Backbone.Sentinel.register([c1, c2]);
-      // $(function(){
-      //   Backbone.Sentinel.register([c1, c2]);
-      // });
+
+      // convenience for getting Sentinel instance
+      window.BS = Backbone.Sentinel.getInstance();
     </script>
 
     <script id="component-1-template" type="backbone-template">

@@ -1,5 +1,5 @@
 //     Backbone.Sentinel v0.0.1
-//     Copyright (c) 2013
+//     Copyright (c) 2014
 //     James Nicol <james@fundly.com>
 //     Distributed under MIT license
 //     git@github.com:jimmynicol/backbone.sentinel.git
@@ -95,6 +95,11 @@
     removeOffRoute:   false   // typically true for popups
   };
   
+  // Placeholder for any data that is bootstrapped to the page and then
+  // inserted into the Sentinel.store accessible by all components
+  Sentinel.Bootstrap = {};
+  
+  
   // Singleton method to make sure we only have one instance of Sentinel
   var instance;
   Sentinel.getInstance = function(){
@@ -152,6 +157,12 @@
     },
   
     registerComponent: function(component){
+      // If the component is not a Backbone view, add a cid property using the
+      // underscore uniqueId method.
+      if (!_.has(component,'cid')){
+        component.cid = _.uniqueId('component');
+      }
+  
       // Add the registered component to an internal list
       this.components = this.components || {};
       this.components[component.cid] = component;
@@ -291,10 +302,11 @@
     },
   
     // Create a top-level model for data storage, broadcast any changes to the
-    // model as events on Sentinel
+    // model as events on Sentinel. Initialize with any data stored againts the
+    // Bootstrap variable.
     initializeStore: function(){
       var _this = this;
-      this.store = new Backbone.Model();
+      this.store = new Backbone.Model(Sentinel.Bootstrap);
       this.store.on('all', function(){
         _this.trigger.apply(_this, arguments);
       });
