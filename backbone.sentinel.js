@@ -149,14 +149,20 @@
   
   // List all the components and their applicable routes
   Sentinel.list = function(){
-    var sentinel = Sentinel.getInstance();
+    var list = [],
+        sentinel = Sentinel.getInstance();
   
-    return _.map(sentinel.components, function(c){
-      return {
-        routes: c.routes,
-        name: c._name
-      };
+    _.each(sentinel.components, function(c){
+      _.each(c.routes, function(method, route){
+        list.push({ Component: c._name, Route: route, Method: method });
+      });
     });
+  
+    if (console.table){
+      console.table(list);
+    } else {
+      return list;
+    }
   };
   
   var SentinelMethods = {
@@ -317,9 +323,12 @@
         if (_.indexOf(removed, _cid) > -1){
           return;
         }
+  
         // If required remove the component as the route changes
-        if (_cid !== cid && c.sentinelOptions.removeOffRoute){
-          _.result(c, 'remove');
+        if (_cid !== cid && c.sentinelOptions.removeOffRoute === true){
+          if (c.remove){
+            c.remove.apply(c);
+          }
           c._sentinelRendered = false;
           removed.push(_cid);
         }
@@ -346,17 +355,41 @@
     SentinelMethods
   );
   
+  function methodNotImplemented(method){
+    throw new Error('Please implement the "' + method + '" method!');
+  }
+  
   // Sentinel Component
   // ------------------
   
   // This class is a simple extension of the Backbone.View and should be used
   // in roughly the same manner. The key exception is that you can nominate from
   // within the class what routes it should respond to.
-  function methodNotImplemented(method){
-    throw new Error('Please implement the "' + method + '" method!');
-  }
+  var Component = Sentinel.Component = function(){
+    var _so = {};
   
-  var ComponentMethods = _.extend(Log, {
+    // Attach a reference to Sentinel
+    this.sentinel = Sentinel.getInstance();
+  
+    // Merge together the default options with the component specific ones
+    _.extend(_so, Sentinel.componentOptions, this.sentinelOptions);
+    this.sentinelOptions = _so;
+  
+    // Run the parent Backbone.View constructor
+    Backbone.View.apply(this, arguments);
+  };
+  
+  // Add static extend method from the Backbone.View, Sentinel.Components are
+  // designed to basically be a Backbone.View with some upgrades
+  Component.extend = Backbone.View.extend;
+  
+  // Add ability to include mixins in extended classes
+  Component.include = function(obj) {
+    _.extend(this.prototype, obj.prototype);
+    return this;
+  };
+  
+  var ComponentMethods = {
     // Override `_name` in the base class to help with logging, it will prefix
     // all log messages
     _name: 'Component',
@@ -365,31 +398,16 @@
     // overriden
     sentinelOptions: {},
   
-    // Override the constructor to merge in the sentinel specific options
-    constructor: function(){
-      var _so = {};
-  
-      // Attach a reference to Sentinel
-      this.sentinel = Sentinel.getInstance();
-  
-      // Merge together the default options with the component specific ones
-      _.extend(_so, Sentinel.componentOptions, this.sentinelOptions);
-      this.sentinelOptions = _so;
-  
-      // Run the parent Backbone.View constructor
-      Backbone.View.apply(this, arguments);
-    },
-  
+    // Placeholder for the render method, it should be implemented.
     render: function(){ methodNotImplemented('render'); }
-  });
-  
-  var Component = Sentinel.Component = Backbone.View.extend(ComponentMethods);
-  
-  // Add ability to include mixins in extended classes
-  Component.include = function(obj) {
-    _.extend(this.prototype, obj.prototype);
-    return this;
   };
+  
+  _.extend(
+    Component.prototype,
+    Log,
+    Backbone.View.prototype,
+    ComponentMethods
+  );
 
   Sentinel.VERSION = '0.0.1';
 

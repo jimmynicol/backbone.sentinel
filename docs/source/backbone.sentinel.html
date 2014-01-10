@@ -416,14 +416,20 @@ inserted into the Sentinel.store accessible by all components</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  Sentinel.list = <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
-    <span class="keyword">var</span> sentinel = Sentinel.getInstance();
+    <span class="keyword">var</span> list = [],
+        sentinel = Sentinel.getInstance();
   
-    <span class="keyword">return</span> _.map(sentinel.components, <span class="function"><span class="keyword">function</span><span class="params">(c)</span>{</span>
-      <span class="keyword">return</span> {
-        routes: c.routes,
-        name: c._name
-      };
+    _.each(sentinel.components, <span class="function"><span class="keyword">function</span><span class="params">(c)</span>{</span>
+      _.each(c.routes, <span class="function"><span class="keyword">function</span><span class="params">(method, route)</span>{</span>
+        list.push({ Component: c._name, Route: route, Method: method });
+      });
     });
+  
+    <span class="keyword">if</span> (console.table){
+      console.table(list);
+    } <span class="keyword">else</span> {
+      <span class="keyword">return</span> list;
+    }
   };
   
   <span class="keyword">var</span> SentinelMethods = {</pre></div></div>
@@ -954,8 +960,10 @@ e.g: in the render method <code>$(body).append(this.$el)</code></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (_cid !== cid &amp;&amp; c.sentinelOptions.removeOffRoute){
-          _.result(c, <span class="string">'remove'</span>);
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (_cid !== cid &amp;&amp; c.sentinelOptions.removeOffRoute === <span class="literal">true</span>){
+          <span class="keyword">if</span> (c.remove){
+            c.remove.apply(c);
+          }
           c._sentinelRendered = <span class="literal">false</span>;
           removed.push(_cid);
         }
@@ -1004,7 +1012,11 @@ Bootstrap variable.</p>
     Log,
     Backbone.Router.prototype,
     SentinelMethods
-  );</pre></div></div>
+  );
+  
+  <span class="function"><span class="keyword">function</span> <span class="title">methodNotImplemented</span><span class="params">(method)</span>{</span>
+    <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'Please implement the "'</span> + method + <span class="string">'" method!'</span>);
+  }</pre></div></div>
             
         </li>
         
@@ -1046,11 +1058,8 @@ within the class what routes it should respond to.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">function</span> <span class="title">methodNotImplemented</span><span class="params">(method)</span>{</span>
-    <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'Please implement the "'</span> + method + <span class="string">'" method!'</span>);
-  }
-  
-  <span class="keyword">var</span> ComponentMethods = _.extend(Log, {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> Component = Sentinel.Component = <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
+    <span class="keyword">var</span> _so = {};</pre></div></div>
             
         </li>
         
@@ -1060,6 +1069,89 @@ within the class what routes it should respond to.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-57">&#182;</a>
+              </div>
+              <p>Attach a reference to Sentinel</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.sentinel = Sentinel.getInstance();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-58">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-58">&#182;</a>
+              </div>
+              <p>Merge together the default options with the component specific ones</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    _.extend(_so, Sentinel.componentOptions, <span class="keyword">this</span>.sentinelOptions);
+    <span class="keyword">this</span>.sentinelOptions = _so;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-59">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-59">&#182;</a>
+              </div>
+              <p>Run the parent Backbone.View constructor</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    Backbone.View.apply(<span class="keyword">this</span>, arguments);
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-60">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-60">&#182;</a>
+              </div>
+              <p>Add static extend method from the Backbone.View, Sentinel.Components are
+designed to basically be a Backbone.View with some upgrades</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Component.extend = Backbone.View.extend;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-61">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-61">&#182;</a>
+              </div>
+              <p>Add ability to include mixins in extended classes</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Component.include = <span class="function"><span class="keyword">function</span><span class="params">(obj)</span> {</span>
+    _.extend(<span class="keyword">this</span>.prototype, obj.prototype);
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+  };
+  
+  <span class="keyword">var</span> ComponentMethods = {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-62">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-62">&#182;</a>
               </div>
               <p>Override <code>_name</code> in the base class to help with logging, it will prefix
 all log messages</p>
@@ -1071,11 +1163,11 @@ all log messages</p>
         </li>
         
         
-        <li id="section-58">
+        <li id="section-63">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-58">&#182;</a>
+                <a class="pilcrow" href="#section-63">&#182;</a>
               </div>
               <p>Set this in the component if any of the above defaults need to be
 overriden</p>
@@ -1087,88 +1179,25 @@ overriden</p>
         </li>
         
         
-        <li id="section-59">
+        <li id="section-64">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-59">&#182;</a>
+                <a class="pilcrow" href="#section-64">&#182;</a>
               </div>
-              <p>Override the constructor to merge in the sentinel specific options</p>
+              <p>Placeholder for the render method, it should be implemented.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    constructor: <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
-      <span class="keyword">var</span> _so = {};</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-60">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-60">&#182;</a>
-              </div>
-              <p>Attach a reference to Sentinel</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      <span class="keyword">this</span>.sentinel = Sentinel.getInstance();</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-61">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-61">&#182;</a>
-              </div>
-              <p>Merge together the default options with the component specific ones</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      _.extend(_so, Sentinel.componentOptions, <span class="keyword">this</span>.sentinelOptions);
-      <span class="keyword">this</span>.sentinelOptions = _so;</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-62">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-62">&#182;</a>
-              </div>
-              <p>Run the parent Backbone.View constructor</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      Backbone.View.apply(<span class="keyword">this</span>, arguments);
-    },
-  
-    render: <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span> methodNotImplemented(<span class="string">'render'</span>); }
-  });
-  
-  <span class="keyword">var</span> Component = Sentinel.Component = Backbone.View.extend(ComponentMethods);</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-63">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-63">&#182;</a>
-              </div>
-              <p>Add ability to include mixins in extended classes</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  Component.include = <span class="function"><span class="keyword">function</span><span class="params">(obj)</span> {</span>
-    _.extend(<span class="keyword">this</span>.prototype, obj.prototype);
-    <span class="keyword">return</span> <span class="keyword">this</span>;
+            <div class="content"><div class='highlight'><pre>    render: <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span> methodNotImplemented(<span class="string">'render'</span>); }
   };
+  
+  _.extend(
+    Component.prototype,
+    Log,
+    Backbone.View.prototype,
+    ComponentMethods
+  );
 
   Sentinel.VERSION = <span class="string">'0.0.1'</span>;
 

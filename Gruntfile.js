@@ -67,7 +67,8 @@ module.exports = function(grunt){
     connect: {
       options: {
         port: config.port,
-        livereload: (config.port + 1)
+        livereload: (config.port + 1),
+        hostname: '*'
       },
       livereload: {
         options: {

@@ -43,7 +43,8 @@
 
     <div id="component-2"></div>
 
-    <script src="docs/js/jquery.js"></script>
+    <!-- <script src="docs/js/jquery.js"></script> -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="docs/js/underscore.js"></script>
     <script src="docs/js/backbone.js"></script>
     <script src="docs/js/backbone.sentinel.js"></script>
@@ -93,12 +94,14 @@
           return this;
         },
 
-        editTitle: function(){
+        editTitle: function(link){
           this.log('edit title');
+          this.$('a').html(link);
         },
 
         editElse: function(){
           this.log('edit else');
+          this.$('a').html('else');
         },
 
         clickHandler: function(){
