@@ -150,20 +150,24 @@
   // List all the components and their applicable routes
   Sentinel.list = function(){
     var list = [],
+        componentNames = [],
         sentinel = Sentinel.getInstance();
   
     _.each(sentinel.components, function(c){
       _.each(c.routes, function(method, route){
         list.push({ Component: c._name, Route: route, Method: method });
+        componentNames.push(c._name);
       });
     });
   
     if (console.table){
       console.table(list);
+      return 'Number of Components: ' + _.uniq(componentNames).length;
     } else {
       return list;
     }
   };
+  
   
   var SentinelMethods = {
   
