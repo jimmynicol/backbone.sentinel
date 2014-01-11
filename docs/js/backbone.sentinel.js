@@ -124,6 +124,9 @@
   // inserted into the Sentinel.store accessible by all components
   Sentinel.Bootstrap = {};
   
+  // Expose the base store model class so it can be overidden if need be
+  Sentinel.StoreClass = Backbone.Model;
+  
   
   // Singleton method to make sure we only have one instance of Sentinel
   var instance;
@@ -344,7 +347,12 @@
     // Bootstrap variable.
     initializeStore: function(){
       var _this = this;
-      this.store = new Backbone.Model(Sentinel.Bootstrap);
+  
+      if (typeof Sentinel.StoreClass === 'undefined'){
+        throw 'Please define the Sentinel.StoreClass';
+      }
+  
+      this.store = new Sentinel.StoreClass(Sentinel.Bootstrap);
       this.store.on('all', function(){
         _this.trigger.apply(_this, arguments);
       });
