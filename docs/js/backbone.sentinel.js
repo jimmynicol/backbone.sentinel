@@ -53,6 +53,11 @@
       if (window){
         var _this, search;
   
+        // only proceed if the console object is available
+        if (!_.has(window, 'console')){
+          return;
+        }
+  
         _this = this;
         search = window.location.search.replace(/^\?/, '').split('&');
   
@@ -66,7 +71,7 @@
     },
   
     log: function(){
-      if (console && this._canLog){
+      if (this._canLog){
         // Check to see if we are requesting logging on a specific component
         if (_.indexOf(this._logComponents, 'debug') === -1){
           // Don't log if this is against a component not in the list
