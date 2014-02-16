@@ -1,7 +1,7 @@
 {
   "name": "backbone.sentinel",
   "main": "backbone.sentinel.js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/jimmynicol/backbone.sentinel",
   "authors": [
     "James Nicol <james.andrew.nicol@gmail.com>"

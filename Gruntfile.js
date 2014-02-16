@@ -115,7 +115,7 @@ module.exports = function(grunt){
         tagName: 'v%VERSION%',
         tagMessage: 'Version %VERSION%',
         push: true,
-        pushTo: 'origin'
+        pushTo: 'upstream'
       }
     }
   });
