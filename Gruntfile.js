@@ -104,6 +104,19 @@ module.exports = function(grunt){
         },
         files: ['lib/**/*.js', 'index.html']
       }
+    },
+    bump: {
+      options: {
+        files: ['package.json', 'bower.json'],
+        commit: true,
+        commitMessage: 'Release v%VERSION%',
+        commitFiles: ['-a'],
+        createTag: true,
+        tagName: 'v%VERSION%',
+        tagMessage: 'Version %VERSION%',
+        push: true,
+        pushTo: 'origin'
+      }
     }
   });
 
