@@ -103,6 +103,7 @@
     this._name = 'Sentinel';
     this._queue = [];
     this.routeMap = [];
+    this.currentRoute = null;
   
     this.initializeRouter();
     this.initializeStore();
@@ -162,10 +163,15 @@
         sentinel = Sentinel.getInstance();
   
     _.each(sentinel.components, function(c){
-      _.each(c.routes, function(method, route){
-        list.push({ Component: c._name, Route: route, Method: method });
+      if (c.routes){
+        _.each(c.routes, function(method, route){
+          list.push({ Component: c._name, Route: route, Method: method });
+          componentNames.push(c._name);
+        });
+      } else {
+        list.push({ Component: c._name, Route: null, Method: null });
         componentNames.push(c._name);
-      });
+      }
     });
   
     if (console.table){
@@ -251,8 +257,9 @@
   
       // loop through each route and
       _.each(component.routes, function(func, route){
-        // throw an error if the route has already been registered
-        if (_this.routeMap[route]){
+        // throw an error if the route has already been registered, unless it
+        // is the default route
+        if (_this.routeMap[route] && route !== ''){
           throw 'The route ' + route + ' has already been registered!';
         }
   
@@ -295,11 +302,17 @@
     },
   
     // Handle receiving the route and sending the info to the appropriate
-    // component and method.
+    // component and method. If the named route matches the current processed
+    // route then do nothing
     handleRoute: function(name, args){
+      if ( name === this.currentRoute ){
+        return;
+      }
+  
       var cid, func, component, _this;
   
       _this = this;
+      this.currentRoute = name;
   
       // Determine the component and bound method call for this route
       cid = name.split('-')[0];
