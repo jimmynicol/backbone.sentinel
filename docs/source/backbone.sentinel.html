@@ -27,7 +27,7 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <pre><code>Backbone.Sentinel v0<span class="number">.0</span><span class="number">.1</span>
+              <pre><code>Backbone.Sentinel v0<span class="number">.2</span><span class="number">.0</span>
 Copyright (c) <span class="number">2014</span>
 James Nicol &lt;james@fundly.com&gt;
 Distributed under MIT license
@@ -159,7 +159,6 @@ anything with conflicting routes.</p>
     _logComponents: [],
   
     detectDebugMode: <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
-  
       <span class="keyword">if</span> (window){
         <span class="keyword">var</span> _this, search;</pre></div></div>
             
@@ -300,8 +299,7 @@ components try to share routes.</p>
     <span class="keyword">this</span>.routeMap = [];
     <span class="keyword">this</span>.currentRoute = <span class="literal">null</span>;
   
-    <span class="keyword">this</span>.initializeRouter();
-    <span class="keyword">this</span>.initializeStore();</pre></div></div>
+    <span class="keyword">this</span>.initializeRouter();</pre></div></div>
             
         </li>
         
@@ -318,7 +316,14 @@ components try to share routes.</p>
             
             <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> _this = <span class="keyword">this</span>;
     $(<span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
-      _this.domLoaded = <span class="literal">true</span>;</pre></div></div>
+      _this.log(<span class="string">'domload'</span>);
+      _this.domLoaded = <span class="literal">true</span>;
+      _this.initializeStore();
+      _this.queue(); <span class="comment">// flush the queue</span>
+    });
+  
+    <span class="keyword">this</span>.log(<span class="string">'initialized!'</span>);
+  };</pre></div></div>
             
         </li>
         
@@ -328,25 +333,6 @@ components try to share routes.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-17">&#182;</a>
-              </div>
-              <p>flush the queue</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      _this.queue();
-    });
-  
-    <span class="keyword">this</span>.log(<span class="string">'initialized!'</span>);
-  };</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-18">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>Default compoent options</p>
 
@@ -361,11 +347,11 @@ components try to share routes.</p>
         </li>
         
         
-        <li id="section-19">
+        <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>Placeholder for any data that is bootstrapped to the page and then
 inserted into the Sentinel.store accessible by all components</p>
@@ -377,11 +363,11 @@ inserted into the Sentinel.store accessible by all components</p>
         </li>
         
         
-        <li id="section-20">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p>Expose the base store model class so it can be overidden if need be</p>
 
@@ -392,11 +378,11 @@ inserted into the Sentinel.store accessible by all components</p>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p>Singleton method to make sure we only have one instance of Sentinel</p>
 
@@ -413,11 +399,11 @@ inserted into the Sentinel.store accessible by all components</p>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p>Register a component with Sentinel</p>
 
@@ -428,21 +414,21 @@ inserted into the Sentinel.store accessible by all components</p>
   
     <span class="keyword">if</span> (_.isArray(component)){
       _.each(component, <span class="function"><span class="keyword">function</span><span class="params">(c)</span>{</span>
-        sentinel.registerComponent(c);
+        sentinel.queue(sentinel.registerComponent, [c]);
       });
     } <span class="keyword">else</span> {
-      sentinel.registerComponent(component);
+      sentinel.queue(sentinel.registerComponent, [component]);
     }
   };</pre></div></div>
             
         </li>
         
         
-        <li id="section-23">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>List all the components and their applicable routes</p>
 
@@ -479,11 +465,11 @@ inserted into the Sentinel.store accessible by all components</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p>Store functions to be run once the DOM has loaded</p>
 
@@ -494,11 +480,11 @@ inserted into the Sentinel.store accessible by all components</p>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p>Push the function on to the queue if present</p>
 
@@ -511,11 +497,11 @@ inserted into the Sentinel.store accessible by all components</p>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>Loop through the queue once the DOM is loaded and run each function</p>
 
@@ -534,6 +520,24 @@ inserted into the Sentinel.store accessible by all components</p>
     },
   
     registerComponent: <span class="function"><span class="keyword">function</span><span class="params">(component)</span>{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>Make sure the component is an instance</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="keyword">if</span> (_.has(component, <span class="string">'prototype'</span>)){
+        <span class="keyword">var</span> ComponentClass = _.bind(component, <span class="literal">null</span>);
+        component = <span class="keyword">new</span> ComponentClass();
+      }</pre></div></div>
             
         </li>
         
@@ -880,7 +884,7 @@ route then do nothing</p>
         component = <span class="keyword">this</span>.components[cid];
       }
   
-      <span class="keyword">this</span>.log(<span class="string">'handle route'</span>, arguments, component);</pre></div></div>
+      <span class="keyword">this</span>.log(<span class="string">'handle route'</span>, name, args);</pre></div></div>
             
         </li>
         
@@ -1253,7 +1257,7 @@ overriden</p>
     ComponentMethods
   );
 
-  Sentinel.VERSION = <span class="string">'0.0.1'</span>;
+  Sentinel.VERSION = <span class="string">'0.2.0'</span>;
 
   <span class="keyword">return</span> Sentinel;
 }));</pre></div></div>

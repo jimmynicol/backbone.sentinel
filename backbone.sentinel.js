@@ -1,4 +1,4 @@
-//     Backbone.Sentinel v0.1.1
+//     Backbone.Sentinel v0.2.0
 //     Copyright (c) 2014
 //     James Nicol <james@fundly.com>
 //     Distributed under MIT license
@@ -49,7 +49,6 @@
     _logComponents: [],
   
     detectDebugMode: function(){
-  
       if (window){
         var _this, search;
   
@@ -106,14 +105,14 @@
     this.currentRoute = null;
   
     this.initializeRouter();
-    this.initializeStore();
   
     // record when the DOM has loaded
     var _this = this;
     $(function(){
+      _this.log('domload');
       _this.domLoaded = true;
-      // flush the queue
-      _this.queue();
+      _this.initializeStore();
+      _this.queue(); // flush the queue
     });
   
     this.log('initialized!');
@@ -149,10 +148,10 @@
   
     if (_.isArray(component)){
       _.each(component, function(c){
-        sentinel.registerComponent(c);
+        sentinel.queue(sentinel.registerComponent, [c]);
       });
     } else {
-      sentinel.registerComponent(component);
+      sentinel.queue(sentinel.registerComponent, [component]);
     }
   };
   
@@ -206,6 +205,12 @@
     },
   
     registerComponent: function(component){
+      // Make sure the component is an instance
+      if (_.has(component, 'prototype')){
+        var ComponentClass = _.bind(component, null);
+        component = new ComponentClass();
+      }
+  
       // If the component is not a Backbone view, add a cid property using the
       // underscore uniqueId method.
       if (!_.has(component,'cid')){
@@ -321,7 +326,7 @@
         component = this.components[cid];
       }
   
-      this.log('handle route', arguments, component);
+      this.log('handle route', name, args);
   
       // If a component matches this route, run the associated callbacks.
       if (component){
@@ -439,7 +444,7 @@
     ComponentMethods
   );
 
-  Sentinel.VERSION = '0.1.1';
+  Sentinel.VERSION = '0.2.0';
 
   return Sentinel;
 }));
