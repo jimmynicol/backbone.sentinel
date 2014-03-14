@@ -1,4 +1,4 @@
-//     Backbone.Sentinel v0.0.1
+//     Backbone.Sentinel v0.3.0
 //     Copyright (c) 2014
 //     James Nicol <james@fundly.com>
 //     Distributed under MIT license
@@ -49,9 +49,13 @@
     _logComponents: [],
   
     detectDebugMode: function(){
-  
       if (window){
         var _this, search;
+  
+        // only proceed if the console object is available
+        if (!_.has(window, 'console')){
+          return;
+        }
   
         _this = this;
         search = window.location.search.replace(/^\?/, '').split('&');
@@ -66,7 +70,7 @@
     },
   
     log: function(){
-      if (console && this._canLog){
+      if (this._canLog){
         // Check to see if we are requesting logging on a specific component
         if (_.indexOf(this._logComponents, 'debug') === -1){
           // Don't log if this is against a component not in the list
@@ -98,16 +102,17 @@
     this._name = 'Sentinel';
     this._queue = [];
     this.routeMap = [];
+    this.currentRoute = null;
   
     this.initializeRouter();
-    this.initializeStore();
   
     // record when the DOM has loaded
     var _this = this;
     $(function(){
+      _this.log('domload');
       _this.domLoaded = true;
-      // flush the queue
-      _this.queue();
+      _this.initializeStore();
+      _this.queue(); // flush the queue
     });
   
     this.log('initialized!');
@@ -123,6 +128,9 @@
   // Placeholder for any data that is bootstrapped to the page and then
   // inserted into the Sentinel.store accessible by all components
   Sentinel.Bootstrap = {};
+  
+  // Expose the base store model class so it can be overidden if need be
+  Sentinel.StoreClass = Backbone.Model;
   
   
   // Singleton method to make sure we only have one instance of Sentinel
@@ -140,10 +148,10 @@
   
     if (_.isArray(component)){
       _.each(component, function(c){
-        sentinel.registerComponent(c);
+        sentinel.queue(sentinel.registerComponent, [c]);
       });
     } else {
-      sentinel.registerComponent(component);
+      sentinel.queue(sentinel.registerComponent, [component]);
     }
   };
   
@@ -154,10 +162,15 @@
         sentinel = Sentinel.getInstance();
   
     _.each(sentinel.components, function(c){
-      _.each(c.routes, function(method, route){
-        list.push({ Component: c._name, Route: route, Method: method });
+      if (c.routes){
+        _.each(c.routes, function(method, route){
+          list.push({ Component: c._name, Route: route, Method: method });
+          componentNames.push(c._name);
+        });
+      } else {
+        list.push({ Component: c._name, Route: null, Method: null });
         componentNames.push(c._name);
-      });
+      }
     });
   
     if (console.table){
@@ -192,6 +205,12 @@
     },
   
     registerComponent: function(component){
+      // Make sure the component is an instance
+      if (_.has(component, 'prototype')){
+        var ComponentClass = _.bind(component, null);
+        component = new ComponentClass();
+      }
+  
       // If the component is not a Backbone view, add a cid property using the
       // underscore uniqueId method.
       if (!_.has(component,'cid')){
@@ -243,8 +262,9 @@
   
       // loop through each route and
       _.each(component.routes, function(func, route){
-        // throw an error if the route has already been registered
-        if (_this.routeMap[route]){
+        // throw an error if the route has already been registered, unless it
+        // is the default route
+        if (_this.routeMap[route] && route !== ''){
           throw 'The route ' + route + ' has already been registered!';
         }
   
@@ -287,11 +307,17 @@
     },
   
     // Handle receiving the route and sending the info to the appropriate
-    // component and method.
+    // component and method. If the named route matches the current processed
+    // route then do nothing
     handleRoute: function(name, args){
+      if ( name === this.currentRoute ){
+        return;
+      }
+  
       var cid, func, component, _this;
   
       _this = this;
+      this.currentRoute = name;
   
       // Determine the component and bound method call for this route
       cid = name.split('-')[0];
@@ -300,7 +326,7 @@
         component = this.components[cid];
       }
   
-      this.log('handle route', arguments, component);
+      this.log('handle route', name, args);
   
       // If a component matches this route, run the associated callbacks.
       if (component){
@@ -344,7 +370,12 @@
     // Bootstrap variable.
     initializeStore: function(){
       var _this = this;
-      this.store = new Backbone.Model(Sentinel.Bootstrap);
+  
+      if (typeof Sentinel.StoreClass === 'undefined'){
+        throw 'Please define the Sentinel.StoreClass';
+      }
+  
+      this.store = new Sentinel.StoreClass(Sentinel.Bootstrap);
       this.store.on('all', function(){
         _this.trigger.apply(_this, arguments);
       });
@@ -413,7 +444,7 @@
     ComponentMethods
   );
 
-  Sentinel.VERSION = '0.0.1';
+  Sentinel.VERSION = '0.3.0';
 
   return Sentinel;
 }));

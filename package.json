@@ -1,6 +1,6 @@
 {
   "name": "backbone.sentinel",
-  "version": "0.0.1",
+  "version": "0.3.0",
   "description": "Backbone.js extension for managing on page components",
   "main": "backbone.sentinel.js",
   "scripts": {
@@ -35,6 +35,7 @@
     "load-grunt-tasks": "~0.2.0",
     "grunt-docco2": "~0.1.5",
     "grunt-contrib-copy": "~0.4.1",
-    "grunt-preprocess": "~4.0.0"
+    "grunt-preprocess": "~4.0.0",
+    "grunt-bump": "0.0.13"
   }
 }

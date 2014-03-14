@@ -1,0 +1,24 @@
+{
+  "name": "backbone.sentinel",
+  "main": "backbone.sentinel.js",
+  "version": "0.3.0",
+  "homepage": "https://github.com/jimmynicol/backbone.sentinel",
+  "authors": [
+    "James Nicol <james.andrew.nicol@gmail.com>"
+  ],
+  "description": "Component manager for Backbone",
+  "keywords": [
+    "Backbone",
+    "Sentinel",
+    "components",
+    "javascript"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
