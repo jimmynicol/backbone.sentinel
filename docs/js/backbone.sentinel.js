@@ -1,4 +1,4 @@
-//     Backbone.Sentinel v0.2.0
+//     Backbone.Sentinel v0.3.0
 //     Copyright (c) 2014
 //     James Nicol <james@fundly.com>
 //     Distributed under MIT license
@@ -444,7 +444,7 @@
     ComponentMethods
   );
 
-  Sentinel.VERSION = '0.2.0';
+  Sentinel.VERSION = '0.3.0';
 
   return Sentinel;
 }));
