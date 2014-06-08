@@ -1,6 +1,6 @@
 {
   "name": "backbone.sentinel",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Backbone.js extension for managing on page components",
   "main": "backbone.sentinel.js",
   "scripts": {
