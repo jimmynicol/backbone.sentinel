@@ -87,11 +87,50 @@
           console.log.apply(console, arguments);
         }
       }
+    },
+  
+    _bm: false,
+    _bmComponents: [],
+  
+    // Is this session capable of benchmarking (ie: can it run console.time)
+    detectBm: function(){
+      var _this, search;
+  
+      if (!_.has(window, 'console')){
+        return;
+      }
+  
+      _this = this;
+      search = window.location.search.replace(/^\?/, '').split('&');
+  
+      _.each(search, function(part){
+        if (/^bm/.test(part)){
+          _this._bm = true;
+          if (part.split('=').length > 1){
+            _this._bmComponents = part.split('=')[1].split(',');
+          }
+        }
+      });
+    },
+  
+    // Benchmark any requested functions
+    bm: function(action, func){
+      if (!this._bm){
+        func.call(this);
+        return;
+      }
+  
+      console.time(action);
+      func.call(this);
+      console.timeEnd(action);
     }
   };
   
   // Detect if the browser session should be logging
   Log.detectDebugMode();
+  
+  // Detect if we want to run any benchmarking
+  Log.detectBm();
   
   // Sentinel
   // --------
@@ -111,6 +150,7 @@
     $(function(){
       _this.log('domload');
       _this.domLoaded = true;
+      _this.initializeEnvironment();
       _this.initializeStore();
       _this.queue(); // flush the queue
     });
@@ -253,8 +293,11 @@
     // component. This is a seperate method so it can be attached to the queue
     // and run when needed
     renderComponent: function(component){
-      _.result(component, 'render');
+      this.bm('render ' + component._name, function(){
+        _.result(component, 'render');
+      });
       component._sentinelRendered = true;
+      this.trigger('component:rendered', component);
     },
   
     registerRoutes: function(component){
@@ -342,8 +385,17 @@
           }
         }
   
+        if (func === 'render' && _.has(component, '_name')) {
+          this.log('renderOnRoute', component._name);
+        }
+  
         // Run the method bound to this route
-        component[func].apply(component, args);
+        this.bm('component onRoute ' + func, function(){
+          component[func].apply(component, args);
+        });
+  
+        // Emit an event to sentinel that this component is rendering
+        this.trigger('onRoute', component);
       }
   
       // Remove any components that are "offRoute"
@@ -379,6 +431,13 @@
       this.store.on('all', function(){
         _this.trigger.apply(_this, arguments);
       });
+    },
+  
+    // Sets an environment object hash that contains contextual info. If you're
+    // thinking of setting just one variable in the global namespace to pass
+    // info down to your component, you probably want to add it here.
+    initializeEnvironment: function(){
+      this.env = Sentinel.Environment || {};
     }
   };
   

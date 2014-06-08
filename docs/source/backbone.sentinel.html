@@ -27,7 +27,7 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <pre><code>Backbone.Sentinel v0<span class="number">.2</span><span class="number">.0</span>
+              <pre><code>Backbone.Sentinel v0<span class="number">.3</span><span class="number">.0</span>
 Copyright (c) <span class="number">2014</span>
 James Nicol &lt;james@fundly.com&gt;
 Distributed under MIT license
@@ -247,8 +247,10 @@ anything with conflicting routes.</p>
           console.log.apply(console, arguments);
         }
       }
-    }
-  };</pre></div></div>
+    },
+  
+    _bm: <span class="literal">false</span>,
+    _bmComponents: [],</pre></div></div>
             
         </li>
         
@@ -259,11 +261,29 @@ anything with conflicting routes.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
-              <p>Detect if the browser session should be logging</p>
+              <p>Is this session capable of benchmarking (ie: can it run console.time)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  Log.detectDebugMode();</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    detectBm: <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
+      <span class="keyword">var</span> _this, search;
+  
+      <span class="keyword">if</span> (!_.has(window, <span class="string">'console'</span>)){
+        <span class="keyword">return</span>;
+      }
+  
+      _this = <span class="keyword">this</span>;
+      search = window.location.search.replace(<span class="regexp">/^\?/</span>, <span class="string">''</span>).split(<span class="string">'&amp;'</span>);
+  
+      _.each(search, <span class="function"><span class="keyword">function</span><span class="params">(part)</span>{</span>
+        <span class="keyword">if</span> (<span class="regexp">/^bm/</span>.test(part)){
+          _this._bm = <span class="literal">true</span>;
+          <span class="keyword">if</span> (part.split(<span class="string">'='</span>).length &gt; <span class="number">1</span>){
+            _this._bmComponents = part.split(<span class="string">'='</span>)[<span class="number">1</span>].split(<span class="string">','</span>);
+          }
+        }
+      });
+    },</pre></div></div>
             
         </li>
         
@@ -274,9 +294,21 @@ anything with conflicting routes.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
-              <h2 id="sentinel">Sentinel</h2>
+              <p>Benchmark any requested functions</p>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre>    bm: <span class="function"><span class="keyword">function</span><span class="params">(action, func)</span>{</span>
+      <span class="keyword">if</span> (!<span class="keyword">this</span>._bm){
+        func.call(<span class="keyword">this</span>);
+        <span class="keyword">return</span>;
+      }
+  
+      console.time(action);
+      func.call(<span class="keyword">this</span>);
+      console.timeEnd(action);
+    }
+  };</pre></div></div>
             
         </li>
         
@@ -286,6 +318,49 @@ anything with conflicting routes.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Detect if the browser session should be logging</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Log.detectDebugMode();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Detect if we want to run any benchmarking</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Log.detectBm();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <h2 id="sentinel">Sentinel</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>Top level singleton to register each component, will throw errors if
 components try to share routes.</p>
@@ -304,11 +379,11 @@ components try to share routes.</p>
         </li>
         
         
-        <li id="section-16">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p>record when the DOM has loaded</p>
 
@@ -318,6 +393,7 @@ components try to share routes.</p>
     $(<span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
       _this.log(<span class="string">'domload'</span>);
       _this.domLoaded = <span class="literal">true</span>;
+      _this.initializeEnvironment();
       _this.initializeStore();
       _this.queue(); <span class="comment">// flush the queue</span>
     });
@@ -328,11 +404,11 @@ components try to share routes.</p>
         </li>
         
         
-        <li id="section-17">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p>Default compoent options</p>
 
@@ -347,11 +423,11 @@ components try to share routes.</p>
         </li>
         
         
-        <li id="section-18">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p>Placeholder for any data that is bootstrapped to the page and then
 inserted into the Sentinel.store accessible by all components</p>
@@ -363,11 +439,11 @@ inserted into the Sentinel.store accessible by all components</p>
         </li>
         
         
-        <li id="section-19">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>Expose the base store model class so it can be overidden if need be</p>
 
@@ -378,11 +454,11 @@ inserted into the Sentinel.store accessible by all components</p>
         </li>
         
         
-        <li id="section-20">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p>Singleton method to make sure we only have one instance of Sentinel</p>
 
@@ -399,11 +475,11 @@ inserted into the Sentinel.store accessible by all components</p>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p>Register a component with Sentinel</p>
 
@@ -424,11 +500,11 @@ inserted into the Sentinel.store accessible by all components</p>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>List all the components and their applicable routes</p>
 
@@ -465,11 +541,11 @@ inserted into the Sentinel.store accessible by all components</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>Store functions to be run once the DOM has loaded</p>
 
@@ -480,11 +556,11 @@ inserted into the Sentinel.store accessible by all components</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p>Push the function on to the queue if present</p>
 
@@ -497,11 +573,11 @@ inserted into the Sentinel.store accessible by all components</p>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <p>Loop through the queue once the DOM is loaded and run each function</p>
 
@@ -524,11 +600,11 @@ inserted into the Sentinel.store accessible by all components</p>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p>Make sure the component is an instance</p>
 
@@ -542,11 +618,11 @@ inserted into the Sentinel.store accessible by all components</p>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p>If the component is not a Backbone view, add a cid property using the
 underscore uniqueId method.</p>
@@ -560,11 +636,11 @@ underscore uniqueId method.</p>
         </li>
         
         
-        <li id="section-28">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>Add the registered component to an internal list</p>
 
@@ -576,11 +652,11 @@ underscore uniqueId method.</p>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p>Attach a reference to the Sentinel on the component if needed</p>
 
@@ -593,11 +669,11 @@ underscore uniqueId method.</p>
         </li>
         
         
-        <li id="section-30">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>Make sure the component has an options hash</p>
 
@@ -610,11 +686,11 @@ underscore uniqueId method.</p>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p>Bubble all events from component to Sentinel</p>
 
@@ -627,11 +703,11 @@ underscore uniqueId method.</p>
         </li>
         
         
-        <li id="section-32">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p>Read component options and render if required</p>
 
@@ -644,11 +720,11 @@ underscore uniqueId method.</p>
         </li>
         
         
-        <li id="section-33">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p>Register any routes</p>
 
@@ -664,11 +740,11 @@ underscore uniqueId method.</p>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>Run the component render function and then set a rendered flag on the
 component. This is a seperate method so it can be attached to the queue
@@ -677,8 +753,11 @@ and run when needed</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>    renderComponent: <span class="function"><span class="keyword">function</span><span class="params">(component)</span>{</span>
-      _.result(component, <span class="string">'render'</span>);
+      <span class="keyword">this</span>.bm(<span class="string">'render '</span> + component._name, <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
+        _.result(component, <span class="string">'render'</span>);
+      });
       component._sentinelRendered = <span class="literal">true</span>;
+      <span class="keyword">this</span>.trigger(<span class="string">'component:rendered'</span>, component);
     },
   
     registerRoutes: <span class="function"><span class="keyword">function</span><span class="params">(component)</span>{</span>
@@ -687,11 +766,11 @@ and run when needed</p>
         </li>
         
         
-        <li id="section-35">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p>loop through each route and</p>
 
@@ -702,11 +781,11 @@ and run when needed</p>
         </li>
         
         
-        <li id="section-36">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>throw an error if the route has already been registered, unless it
 is the default route</p>
@@ -720,11 +799,11 @@ is the default route</p>
         </li>
         
         
-        <li id="section-37">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>add the route and hash to <code>this.routeMap</code></p>
 
@@ -735,11 +814,11 @@ is the default route</p>
         </li>
         
         
-        <li id="section-38">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p>register the route with the backbone router
 TODO: this is a dirty way of passing info with the route, try and
@@ -760,11 +839,11 @@ route</p>
         </li>
         
         
-        <li id="section-39">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
               <p>Initialize the router and capture the route change event</p>
 
@@ -776,11 +855,11 @@ route</p>
         </li>
         
         
-        <li id="section-40">
+        <li id="section-43">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
               <p>Attach a default route so we can hide components when all routes are
 removed</p>
@@ -793,11 +872,11 @@ removed</p>
         </li>
         
         
-        <li id="section-41">
+        <li id="section-44">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
+                <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
               <p>Listen to the top-level route event to pass onto the sentinel method</p>
 
@@ -808,11 +887,11 @@ removed</p>
         </li>
         
         
-        <li id="section-42">
+        <li id="section-45">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-45">&#182;</a>
               </div>
               <p>Drop the redundant router argument when passing on</p>
 
@@ -824,11 +903,11 @@ removed</p>
         </li>
         
         
-        <li id="section-43">
+        <li id="section-46">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
               <p>Start the history</p>
 
@@ -843,11 +922,11 @@ removed</p>
         </li>
         
         
-        <li id="section-44">
+        <li id="section-47">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-47">&#182;</a>
               </div>
               <p>Handle receiving the route and sending the info to the appropriate
 component and method. If the named route matches the current processed
@@ -868,11 +947,11 @@ route then do nothing</p>
         </li>
         
         
-        <li id="section-45">
+        <li id="section-48">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
               <p>Determine the component and bound method call for this route</p>
 
@@ -889,11 +968,11 @@ route then do nothing</p>
         </li>
         
         
-        <li id="section-46">
+        <li id="section-49">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
+                <a class="pilcrow" href="#section-49">&#182;</a>
               </div>
               <p>If a component matches this route, run the associated callbacks.</p>
 
@@ -904,11 +983,11 @@ route then do nothing</p>
         </li>
         
         
-        <li id="section-47">
+        <li id="section-50">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-47">&#182;</a>
+                <a class="pilcrow" href="#section-50">&#182;</a>
               </div>
               <p>If the bound callback is not render and the option to renderOnRoute
 is set then render the component</p>
@@ -920,11 +999,11 @@ is set then render the component</p>
         </li>
         
         
-        <li id="section-48">
+        <li id="section-51">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-48">&#182;</a>
+                <a class="pilcrow" href="#section-51">&#182;</a>
               </div>
               <p>Don’t re-render the component</p>
 
@@ -935,11 +1014,11 @@ is set then render the component</p>
         </li>
         
         
-        <li id="section-49">
+        <li id="section-52">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-49">&#182;</a>
+                <a class="pilcrow" href="#section-52">&#182;</a>
               </div>
               <p>On re-render it is up to the component author to handle attaching
 component to the DOM.
@@ -949,32 +1028,53 @@ e.g: in the render method <code>$(body).append(this.$el)</code></p>
             
             <div class="content"><div class='highlight'><pre>            <span class="keyword">this</span>.queue(<span class="keyword">this</span>.renderComponent, [component]);
           }
+        }
+  
+        <span class="keyword">if</span> (func === <span class="string">'render'</span> &amp;&amp; _.has(component, <span class="string">'_name'</span>)) {
+          <span class="keyword">this</span>.log(<span class="string">'renderOnRoute'</span>, component._name);
         }</pre></div></div>
             
         </li>
         
         
-        <li id="section-50">
+        <li id="section-53">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-50">&#182;</a>
+                <a class="pilcrow" href="#section-53">&#182;</a>
               </div>
               <p>Run the method bound to this route</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        component[func].apply(component, args);
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">this</span>.bm(<span class="string">'component onRoute '</span> + func, <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
+          component[func].apply(component, args);
+        });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-54">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-54">&#182;</a>
+              </div>
+              <p>Emit an event to sentinel that this component is rendering</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">this</span>.trigger(<span class="string">'onRoute'</span>, component);
       }</pre></div></div>
             
         </li>
         
         
-        <li id="section-51">
+        <li id="section-55">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-51">&#182;</a>
+                <a class="pilcrow" href="#section-55">&#182;</a>
               </div>
               <p>Remove any components that are “offRoute”</p>
 
@@ -986,11 +1086,11 @@ e.g: in the render method <code>$(body).append(this.$el)</code></p>
         </li>
         
         
-        <li id="section-52">
+        <li id="section-56">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-52">&#182;</a>
+                <a class="pilcrow" href="#section-56">&#182;</a>
               </div>
               <p>Make sure we do not try and remove the component more than once</p>
 
@@ -1003,11 +1103,11 @@ e.g: in the render method <code>$(body).append(this.$el)</code></p>
         </li>
         
         
-        <li id="section-53">
+        <li id="section-57">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-53">&#182;</a>
+                <a class="pilcrow" href="#section-57">&#182;</a>
               </div>
               <p>If required remove the component as the route changes</p>
 
@@ -1026,11 +1126,11 @@ e.g: in the render method <code>$(body).append(this.$el)</code></p>
         </li>
         
         
-        <li id="section-54">
+        <li id="section-58">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-54">&#182;</a>
+                <a class="pilcrow" href="#section-58">&#182;</a>
               </div>
               <p>Create a top-level model for data storage, broadcast any changes to the
 model as events on Sentinel. Initialize with any data stored againts the
@@ -1049,17 +1149,36 @@ Bootstrap variable.</p>
       <span class="keyword">this</span>.store.on(<span class="string">'all'</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
         _this.trigger.apply(_this, arguments);
       });
+    },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-59">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-59">&#182;</a>
+              </div>
+              <p>Sets an environment object hash that contains contextual info. If you’re
+thinking of setting just one variable in the global namespace to pass
+info down to your component, you probably want to add it here.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    initializeEnvironment: <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
+      <span class="keyword">this</span>.env = Sentinel.Environment || {};
     }
   };</pre></div></div>
             
         </li>
         
         
-        <li id="section-55">
+        <li id="section-60">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-55">&#182;</a>
+                <a class="pilcrow" href="#section-60">&#182;</a>
               </div>
               <p>Merge in the methods, Logger and Router to the Sentinel prototype</p>
 
@@ -1079,11 +1198,11 @@ Bootstrap variable.</p>
         </li>
         
         
-        <li id="section-56">
+        <li id="section-61">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-56">&#182;</a>
+                <a class="pilcrow" href="#section-61">&#182;</a>
               </div>
               <h2 id="sentinel-component">Sentinel Component</h2>
 
@@ -1092,11 +1211,11 @@ Bootstrap variable.</p>
         </li>
         
         
-        <li id="section-57">
+        <li id="section-62">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-57">&#182;</a>
+                <a class="pilcrow" href="#section-62">&#182;</a>
               </div>
               
             </div>
@@ -1104,11 +1223,11 @@ Bootstrap variable.</p>
         </li>
         
         
-        <li id="section-58">
+        <li id="section-63">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-58">&#182;</a>
+                <a class="pilcrow" href="#section-63">&#182;</a>
               </div>
               <p>This class is a simple extension of the Backbone.View and should be used
 in roughly the same manner. The key exception is that you can nominate from
@@ -1122,11 +1241,11 @@ within the class what routes it should respond to.</p>
         </li>
         
         
-        <li id="section-59">
+        <li id="section-64">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-59">&#182;</a>
+                <a class="pilcrow" href="#section-64">&#182;</a>
               </div>
               <p>Attach a reference to Sentinel</p>
 
@@ -1137,11 +1256,11 @@ within the class what routes it should respond to.</p>
         </li>
         
         
-        <li id="section-60">
+        <li id="section-65">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-60">&#182;</a>
+                <a class="pilcrow" href="#section-65">&#182;</a>
               </div>
               <p>Merge together the default options with the component specific ones</p>
 
@@ -1153,11 +1272,11 @@ within the class what routes it should respond to.</p>
         </li>
         
         
-        <li id="section-61">
+        <li id="section-66">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-61">&#182;</a>
+                <a class="pilcrow" href="#section-66">&#182;</a>
               </div>
               <p>Run the parent Backbone.View constructor</p>
 
@@ -1169,11 +1288,11 @@ within the class what routes it should respond to.</p>
         </li>
         
         
-        <li id="section-62">
+        <li id="section-67">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-62">&#182;</a>
+                <a class="pilcrow" href="#section-67">&#182;</a>
               </div>
               <p>Add static extend method from the Backbone.View, Sentinel.Components are
 designed to basically be a Backbone.View with some upgrades</p>
@@ -1185,11 +1304,11 @@ designed to basically be a Backbone.View with some upgrades</p>
         </li>
         
         
-        <li id="section-63">
+        <li id="section-68">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-63">&#182;</a>
+                <a class="pilcrow" href="#section-68">&#182;</a>
               </div>
               <p>Add ability to include mixins in extended classes</p>
 
@@ -1205,11 +1324,11 @@ designed to basically be a Backbone.View with some upgrades</p>
         </li>
         
         
-        <li id="section-64">
+        <li id="section-69">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-64">&#182;</a>
+                <a class="pilcrow" href="#section-69">&#182;</a>
               </div>
               <p>Override <code>_name</code> in the base class to help with logging, it will prefix
 all log messages</p>
@@ -1221,11 +1340,11 @@ all log messages</p>
         </li>
         
         
-        <li id="section-65">
+        <li id="section-70">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-65">&#182;</a>
+                <a class="pilcrow" href="#section-70">&#182;</a>
               </div>
               <p>Set this in the component if any of the above defaults need to be
 overriden</p>
@@ -1237,11 +1356,11 @@ overriden</p>
         </li>
         
         
-        <li id="section-66">
+        <li id="section-71">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-66">&#182;</a>
+                <a class="pilcrow" href="#section-71">&#182;</a>
               </div>
               <p>Placeholder for the render method, it should be implemented.</p>
 
@@ -1257,7 +1376,7 @@ overriden</p>
     ComponentMethods
   );
 
-  Sentinel.VERSION = <span class="string">'0.2.0'</span>;
+  Sentinel.VERSION = <span class="string">'0.3.0'</span>;
 
   <span class="keyword">return</span> Sentinel;
 }));</pre></div></div>
